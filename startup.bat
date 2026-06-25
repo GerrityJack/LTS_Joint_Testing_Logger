@@ -57,7 +57,7 @@ echo.
 :: -- Step 2: Start LakeShore 218 logger ---------------------------------------
 echo [2/3] Starting LakeShore 218 logger...
 
-powershell -NoProfile -Command "$procs = Get-CimInstance Win32_Process -Filter \"Name = 'python.exe'\" | Where-Object { $_.CommandLine -like '*lakeshore218_logger.py*' }; if ($procs) { exit 1 } else { exit 0 }"
+powershell -NoProfile -Command "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'python.exe' -and $_.CommandLine -like '*lakeshore218_logger.py*' }; if ($procs) { exit 1 } else { exit 0 }"
 
 IF %ERRORLEVEL% EQU 1 (
     echo  INFO: LakeShore 218 logger is already running - skipping to prevent duplicates.
@@ -71,7 +71,7 @@ echo.
 :: -- Step 3: Start Keithley 2401 logger ---------------------------------------
 echo [3/3] Starting Keithley 2401 logger...
 
-powershell -NoProfile -Command "$procs = Get-CimInstance Win32_Process -Filter \"Name = 'python.exe'\" | Where-Object { $_.CommandLine -like '*keithley2401_logger.py*' }; if ($procs) { exit 1 } else { exit 0 }"
+powershell -NoProfile -Command "$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'python.exe' -and $_.CommandLine -like '*keithley2401_logger.py*' }; if ($procs) { exit 1 } else { exit 0 }"
 
 IF %ERRORLEVEL% EQU 1 (
     echo  INFO: Keithley 2401 logger is already running - skipping to prevent duplicates.
