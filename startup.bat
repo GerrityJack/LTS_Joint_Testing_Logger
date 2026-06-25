@@ -11,7 +11,7 @@ echo   %DATE%  %TIME%
 echo  ============================================================
 echo.
 
-:: ── Configuration ────────────────────────────────────────────────────────────
+:: -- Configuration -----------------------------------------------------------
 SET "LAB_DIR=%~dp0"
 IF "%LAB_DIR:~-1%"=="\" SET "LAB_DIR=%LAB_DIR:~0,-1%"
 
@@ -20,13 +20,10 @@ SET QUESTDB_PORT=9000
 SET QUESTDB_WAIT=8
 SET DRIVER_WAIT=3
 
-:: ── Step 1: Check / start QuestDB ────────────────────────────────────────────
+:: -- Step 1: Check / start QuestDB --------------------------------------------
 echo [1/3] Checking QuestDB...
 
-powershell -NoProfile -Command ^
-    "$c = New-Object Net.Sockets.TcpClient; " ^
-    "try { $c.Connect('localhost', %QUESTDB_PORT%); $c.Close(); exit 0 } " ^
-    "catch { exit 1 }"
+powershell -NoProfile -Command "$c = New-Object Net.Sockets.TcpClient; try { $c.Connect('localhost', %QUESTDB_PORT%); $c.Close(); exit 0 } catch { exit 1 }"
 
 IF %ERRORLEVEL% EQU 0 (
     echo  OK - QuestDB is already running on port %QUESTDB_PORT%.
@@ -45,10 +42,7 @@ start "QuestDB" /MIN "%QUESTDB_EXE%" start
 echo  Waiting %QUESTDB_WAIT%s for QuestDB to become ready...
 timeout /t %QUESTDB_WAIT% /nobreak >nul
 
-powershell -NoProfile -Command ^
-    "$c = New-Object Net.Sockets.TcpClient; " ^
-    "try { $c.Connect('localhost', %QUESTDB_PORT%); $c.Close(); exit 0 } " ^
-    "catch { exit 1 }"
+powershell -NoProfile -Command "$c = New-Object Net.Sockets.TcpClient; try { $c.Connect('localhost', %QUESTDB_PORT%); $c.Close(); exit 0 } catch { exit 1 }"
 
 IF %ERRORLEVEL% NEQ 0 (
     echo  ERROR: QuestDB still not reachable on port %QUESTDB_PORT% after waiting.
@@ -60,13 +54,10 @@ echo  OK - QuestDB is now running.
 :QUESTDB_DONE
 echo.
 
-:: ── Step 2: Start LakeShore 218 logger ───────────────────────────────────────
+:: -- Step 2: Start LakeShore 218 logger ---------------------------------------
 echo [2/3] Starting LakeShore 218 logger...
 
-powershell -NoProfile -Command ^
-    "$procs = Get-CimInstance Win32_Process -Filter \"Name = 'python.exe'\" | " ^
-    "Where-Object { $_.CommandLine -like '*lakeshore218_logger.py*' }; " ^
-    "if ($procs) { exit 1 } else { exit 0 }"
+powershell -NoProfile -Command "$procs = Get-CimInstance Win32_Process -Filter \"Name = 'python.exe'\" | Where-Object { $_.CommandLine -like '*lakeshore218_logger.py*' }; if ($procs) { exit 1 } else { exit 0 }"
 
 IF %ERRORLEVEL% EQU 1 (
     echo  INFO: LakeShore 218 logger is already running - skipping to prevent duplicates.
@@ -77,13 +68,10 @@ IF %ERRORLEVEL% EQU 1 (
 )
 echo.
 
-:: ── Step 3: Start Keithley 2401 logger ───────────────────────────────────────
+:: -- Step 3: Start Keithley 2401 logger ---------------------------------------
 echo [3/3] Starting Keithley 2401 logger...
 
-powershell -NoProfile -Command ^
-    "$procs = Get-CimInstance Win32_Process -Filter \"Name = 'python.exe'\" | " ^
-    "Where-Object { $_.CommandLine -like '*keithley2401_logger.py*' }; " ^
-    "if ($procs) { exit 1 } else { exit 0 }"
+powershell -NoProfile -Command "$procs = Get-CimInstance Win32_Process -Filter \"Name = 'python.exe'\" | Where-Object { $_.CommandLine -like '*keithley2401_logger.py*' }; if ($procs) { exit 1 } else { exit 0 }"
 
 IF %ERRORLEVEL% EQU 1 (
     echo  INFO: Keithley 2401 logger is already running - skipping to prevent duplicates.
