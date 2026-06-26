@@ -16,7 +16,8 @@ SET "LAB_DIR=%~dp0"
 IF "%LAB_DIR:~-1%"=="\" SET "LAB_DIR=%LAB_DIR:~0,-1%"
 
 SET "QUESTDB_EXE=C:\Users\scuser\Program\questdb\bin\questdb.exe"
-SET QUESTDB_PORT=9000
+SET "QUESTDB_ROOT=C:\Users\scuser\Program\questdb\data"
+SET QUESTDB_PORT=9010
 
 SET "GRAFANA_HOME=C:\Users\scuser\Program\grafana"
 SET "GRAFANA_EXE=C:\Users\scuser\Program\grafana\bin\grafana-server.exe"
@@ -28,7 +29,7 @@ SET DRIVER_WAIT=3
 :: -- Step 1: Check / start QuestDB --------------------------------------------
 echo [1/4] Checking QuestDB...
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%LAB_DIR%\check_port.ps1" -Port %QUESTDB_PORT%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%LAB_DIR%\check_questdb.ps1" -Port %QUESTDB_PORT%
 
 IF %ERRORLEVEL% EQU 0 (
     echo  OK - QuestDB is already running on port %QUESTDB_PORT%.
@@ -43,11 +44,12 @@ IF NOT EXIST "%QUESTDB_EXE%" (
     goto :FATAL
 )
 
-start "QuestDB" /MIN "%QUESTDB_EXE%" start
+SET QDB_HTTP_NET_BIND_TO=0.0.0.0:%QUESTDB_PORT%
+start "QuestDB" /MIN "%QUESTDB_EXE%" -d "%QUESTDB_ROOT%"
 echo  Waiting %SERVICE_WAIT%s for QuestDB to become ready...
 timeout /t %SERVICE_WAIT% /nobreak >nul
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%LAB_DIR%\check_port.ps1" -Port %QUESTDB_PORT%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%LAB_DIR%\check_questdb.ps1" -Port %QUESTDB_PORT%
 
 IF %ERRORLEVEL% NEQ 0 (
     echo  ERROR: QuestDB still not reachable on port %QUESTDB_PORT% after waiting.
@@ -62,7 +64,7 @@ echo.
 :: -- Step 2: Check / start Grafana ---------------------------------------------
 echo [2/4] Checking Grafana...
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%LAB_DIR%\check_port.ps1" -Port %GRAFANA_PORT%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%LAB_DIR%\check_grafana.ps1" -Port %GRAFANA_PORT%
 
 IF %ERRORLEVEL% EQU 0 (
     echo  OK - Grafana is already running on port %GRAFANA_PORT%.
@@ -81,7 +83,7 @@ start "Grafana" /D "%GRAFANA_HOME%" /MIN "%GRAFANA_EXE%"
 echo  Waiting %SERVICE_WAIT%s for Grafana to become ready...
 timeout /t %SERVICE_WAIT% /nobreak >nul
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%LAB_DIR%\check_port.ps1" -Port %GRAFANA_PORT%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%LAB_DIR%\check_grafana.ps1" -Port %GRAFANA_PORT%
 
 IF %ERRORLEVEL% NEQ 0 (
     echo  ERROR: Grafana still not reachable on port %GRAFANA_PORT% after waiting.
