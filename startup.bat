@@ -103,7 +103,7 @@ IF %ERRORLEVEL% EQU 1 (
 ) ELSE (
     start "LakeShore 218 Logger" /D "%LAB_DIR%" /MIN cmd /k python lakeshore218_logger.py
     timeout /t %DRIVER_WAIT% /nobreak >nul
-    echo  OK - LakeShore 218 logger launched (check its window for hardware errors).
+    echo  OK - LakeShore 218 logger launched ^(check its window for hardware errors^).
 )
 echo.
 
@@ -117,7 +117,7 @@ IF %ERRORLEVEL% EQU 1 (
 ) ELSE (
     start "Keithley 2401 Logger" /D "%LAB_DIR%" /MIN cmd /k python keithley2401_logger.py
     timeout /t %DRIVER_WAIT% /nobreak >nul
-    echo  OK - Keithley 2401 logger launched (check its window for hardware errors).
+    echo  OK - Keithley 2401 logger launched ^(check its window for hardware errors^).
 )
 echo.
 
