@@ -62,7 +62,7 @@ KEITHLEY_ELEMENTS = ["VOLT", "CURR", "RES"]
 
 # ── QuestDB ────────────────────────────────────────────────────────────────────
 QUESTDB_HOST = "localhost"
-QUESTDB_PORT = 9000   # HTTP/ILP port used by the questdb Python client
+QUESTDB_PORT = 9010   # moved from default 9000 -- ZSA Tunnel (keyboard software) squats on 9000 on this machine
 
 QUESTDB_EXE_PATH = r"C:\Users\scuser\Program\questdb\bin\questdb.exe"
 
