@@ -49,7 +49,12 @@ KEITHLEY_ELEMENTS = ["VOLT", "CURR", "RES"]
 QUESTDB_HOST = "localhost"
 QUESTDB_PORT = 9000   # HTTP/ILP port used by the questdb Python client
 
-QUESTDB_EXE_PATH = r"C:\Users\scuser\questdb\questdb-9.4.3-rt-windows-x86-64\bin\questdb.exe"
+QUESTDB_EXE_PATH = r"C:\Users\scuser\Program\questdb\bin\questdb.exe"
+
+# ── Grafana (dashboard) ────────────────────────────────────────────────────────
+GRAFANA_HOME = r"C:\Users\scuser\Program\grafana"
+GRAFANA_EXE_PATH = r"C:\Users\scuser\Program\grafana\bin\grafana-server.exe"
+GRAFANA_PORT = 3000
 
 LAKESHORE_TABLE = "lakeshore218_temps"
 KEITHLEY_TABLE  = "keithley2401_smu"
