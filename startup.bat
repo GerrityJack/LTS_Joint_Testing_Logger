@@ -16,6 +16,7 @@ SET "LAB_DIR=%~dp0"
 IF "%LAB_DIR:~-1%"=="\" SET "LAB_DIR=%LAB_DIR:~0,-1%"
 
 SET "QUESTDB_EXE=C:\Users\scuser\Program\questdb\bin\questdb.exe"
+SET "QUESTDB_ROOT=C:\Users\scuser\Program\questdb\data"
 SET QUESTDB_PORT=9010
 
 SET "GRAFANA_HOME=C:\Users\scuser\Program\grafana"
@@ -43,7 +44,8 @@ IF NOT EXIST "%QUESTDB_EXE%" (
     goto :FATAL
 )
 
-start "QuestDB" /MIN "%QUESTDB_EXE%"
+SET QDB_HTTP_NET_BIND_TO=0.0.0.0:%QUESTDB_PORT%
+start "QuestDB" /MIN "%QUESTDB_EXE%" -d "%QUESTDB_ROOT%"
 echo  Waiting %SERVICE_WAIT%s for QuestDB to become ready...
 timeout /t %SERVICE_WAIT% /nobreak >nul
 

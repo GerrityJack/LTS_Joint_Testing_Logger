@@ -66,6 +66,13 @@ QUESTDB_PORT = 9010   # moved from default 9000 -- ZSA Tunnel (keyboard software
 
 QUESTDB_EXE_PATH = r"C:\Users\scuser\Program\questdb\bin\questdb.exe"
 
+# Explicit root directory (conf/db/log/public live here). Passed via -d so
+# QuestDB always uses the same root regardless of what directory it happens
+# to be launched from (its default behavior when run interactively is to use
+# the current working directory at launch time as root, which is ambiguous
+# and was the source of earlier port-config confusion).
+QUESTDB_ROOT = r"C:\Users\scuser\Program\questdb\data"
+
 # ── Grafana (dashboard) ────────────────────────────────────────────────────────
 GRAFANA_HOME = r"C:\Users\scuser\Program\grafana"
 GRAFANA_EXE_PATH = r"C:\Users\scuser\Program\grafana\bin\grafana-server.exe"
