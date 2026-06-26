@@ -1,9 +1,17 @@
 """
 keithley2401_logger.py
 ─────────────────────────────────────────────────────────────────────────────
-Polls a Keithley Model 2401 SourceMeter over RS232 (via USB-serial adapter)
-using PyVISA, and writes Voltage/Current/Resistance readings to QuestDB
-every lab_config.POLL_INTERVAL_S seconds.
+Polls a Keithley Model 2401 SourceMeter using PyVISA, and writes
+Voltage/Current/Resistance readings to QuestDB every
+lab_config.POLL_INTERVAL_S seconds.
+
+Supports two interfaces, set via lab_config.KEITHLEY_INTERFACE:
+  - "GPIB"  : via a GPIB controller card + cable (e.g. a Keysight 10833F
+              cable into a PCIe GPIB card). Requires the card vendor's VISA
+              runtime installed (Keysight IO Libraries Suite, or NI-VISA) --
+              pyvisa-py does NOT support GPIB.
+  - "RS232" : via a USB-to-serial adapter, using the pure-Python pyvisa-py
+              backend (no extra runtime needed beyond pip packages).
 
 This logs whatever the instrument is currently configured to source/measure
 — it does not change source settings, output state, or run a sweep. If you
@@ -15,11 +23,16 @@ Run standalone:
 
 Dependencies:
     pip install pyvisa pyvisa-py pyserial questdb
+    (GPIB also requires Keysight IO Libraries Suite or NI-VISA installed
+    separately -- not a pip package.)
 
 To run, edit lab_config.py:
-    KEITHLEY_PORT        -> the COM port assigned to the adapter
-    KEITHLEY_TERMINATION -> must match the instrument's front-panel RS232
-                            terminator setting (MENU -> COMMUNICATION -> RS-232)
+    KEITHLEY_INTERFACE    -> "GPIB" or "RS232"
+    KEITHLEY_GPIB_ADDRESS -> GPIB address set on the instrument's front panel
+                             (MENU -> COMMUNICATION -> GPIB), if using GPIB
+    KEITHLEY_PORT         -> the COM port assigned to the adapter, if using RS232
+    KEITHLEY_TERMINATION  -> must match the instrument's front-panel RS232
+                             terminator setting, if using RS232
 """
 
 import sys
@@ -61,17 +74,31 @@ signal.signal(signal.SIGTERM, _handle_shutdown)
 
 
 def connect_instrument():
-    """Open the Keithley 2401 over RS232 via PyVISA and set the read format."""
-    rm = pyvisa.ResourceManager("@py")
-    resource_name = f"ASRL{cfg.KEITHLEY_PORT.replace('COM', '')}::INSTR"
-    inst = rm.open_resource(resource_name)
-    inst.baud_rate = cfg.KEITHLEY_BAUD
-    inst.data_bits = cfg.KEITHLEY_DATA_BITS
-    inst.parity = _PARITY_MAP[cfg.KEITHLEY_PARITY]
-    inst.stop_bits = _STOPBITS_MAP[cfg.KEITHLEY_STOP_BITS]
-    inst.write_termination = cfg.KEITHLEY_TERMINATION
-    inst.read_termination = cfg.KEITHLEY_TERMINATION
-    inst.timeout = cfg.KEITHLEY_TIMEOUT_MS
+    """
+    Opens the Keithley 2401 via either GPIB or RS232, depending on
+    lab_config.KEITHLEY_INTERFACE, and sets the read format.
+    """
+    if cfg.KEITHLEY_INTERFACE.upper() == "GPIB":
+        # GPIB needs the system VISA runtime (e.g. Keysight IO Libraries
+        # Suite, or NI-VISA) -- no "@py" here, since pyvisa-py doesn't
+        # support GPIB. ResourceManager() with no args auto-discovers
+        # whichever VISA implementation is installed on the machine.
+        rm = pyvisa.ResourceManager()
+        resource_name = f"GPIB{cfg.KEITHLEY_GPIB_BOARD}::{cfg.KEITHLEY_GPIB_ADDRESS}::INSTR"
+        inst = rm.open_resource(resource_name)
+        inst.timeout = cfg.KEITHLEY_TIMEOUT_MS
+    else:
+        # RS232 via USB-serial adapter, using the pure-Python pyvisa-py backend.
+        rm = pyvisa.ResourceManager("@py")
+        resource_name = f"ASRL{cfg.KEITHLEY_PORT.replace('COM', '')}::INSTR"
+        inst = rm.open_resource(resource_name)
+        inst.baud_rate = cfg.KEITHLEY_BAUD
+        inst.data_bits = cfg.KEITHLEY_DATA_BITS
+        inst.parity = _PARITY_MAP[cfg.KEITHLEY_PARITY]
+        inst.stop_bits = _STOPBITS_MAP[cfg.KEITHLEY_STOP_BITS]
+        inst.write_termination = cfg.KEITHLEY_TERMINATION
+        inst.read_termination = cfg.KEITHLEY_TERMINATION
+        inst.timeout = cfg.KEITHLEY_TIMEOUT_MS
 
     # Fix which elements :READ? returns, in a known order, every time.
     elements = ",".join(cfg.KEITHLEY_ELEMENTS)

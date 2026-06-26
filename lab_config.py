@@ -29,7 +29,22 @@ LAKESHORE_TIMEOUT_MS = 5000
 # value, which is fine to log).
 LAKESHORE_NUM_CHANNELS = 8
 
-# ── Keithley 2401 serial settings ─────────────────────────────────────────────
+# ── Keithley 2401 interface ───────────────────────────────────────────────────
+# "GPIB" (via a GPIB controller card + cable, e.g. Keysight 10833F cable into a
+# PCIe GPIB card) or "RS232" (via USB-to-serial adapter). GPIB requires the
+# card vendor's VISA runtime installed (e.g. Keysight IO Libraries Suite, or
+# NI-VISA) -- pyvisa-py does NOT support GPIB, only the RS232 path below uses it.
+KEITHLEY_INTERFACE = "GPIB"
+
+# GPIB address set on the instrument's front panel:
+# MENU -> COMMUNICATION -> GPIB. Default on the 2401 is commonly 24, but
+# confirm against what's actually shown on the panel.
+KEITHLEY_GPIB_ADDRESS = 24
+# GPIB controller/board index. "GPIB0" is correct if there's only one GPIB
+# card/controller installed on the machine (the normal case).
+KEITHLEY_GPIB_BOARD = 0
+
+# ── Keithley 2401 RS232 settings (only used if KEITHLEY_INTERFACE = "RS232") ──
 # Must match what's set on the instrument's front panel:
 # MENU -> COMMUNICATION -> RS-232 -> BAUD / BITS / PARITY / TERMINATOR
 KEITHLEY_BAUD       = 9600
