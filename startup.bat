@@ -43,7 +43,7 @@ IF NOT EXIST "%QUESTDB_EXE%" (
     goto :FATAL
 )
 
-start "QuestDB" /MIN "%QUESTDB_EXE%" start
+start "QuestDB" /MIN "%QUESTDB_EXE%"
 echo  Waiting %SERVICE_WAIT%s for QuestDB to become ready...
 timeout /t %SERVICE_WAIT% /nobreak >nul
 
