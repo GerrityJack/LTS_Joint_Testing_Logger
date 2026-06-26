@@ -62,7 +62,7 @@ powershell -NoProfile -Command "$procs = Get-CimInstance Win32_Process | Where-O
 IF %ERRORLEVEL% EQU 1 (
     echo  INFO: LakeShore 218 logger is already running - skipping to prevent duplicates.
 ) ELSE (
-    start "LakeShore 218 Logger" /MIN cmd /k "cd /d "%LAB_DIR%" && python lakeshore218_logger.py"
+    start "LakeShore 218 Logger" /D "%LAB_DIR%" /MIN cmd /k python lakeshore218_logger.py
     timeout /t %DRIVER_WAIT% /nobreak >nul
     echo  OK - LakeShore 218 logger launched (check its window for hardware errors).
 )
@@ -76,7 +76,7 @@ powershell -NoProfile -Command "$procs = Get-CimInstance Win32_Process | Where-O
 IF %ERRORLEVEL% EQU 1 (
     echo  INFO: Keithley 2401 logger is already running - skipping to prevent duplicates.
 ) ELSE (
-    start "Keithley 2401 Logger" /MIN cmd /k "cd /d "%LAB_DIR%" && python keithley2401_logger.py"
+    start "Keithley 2401 Logger" /D "%LAB_DIR%" /MIN cmd /k python keithley2401_logger.py
     timeout /t %DRIVER_WAIT% /nobreak >nul
     echo  OK - Keithley 2401 logger launched (check its window for hardware errors).
 )
