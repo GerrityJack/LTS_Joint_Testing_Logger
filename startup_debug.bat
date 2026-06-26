@@ -1,4 +1,4 @@
-@echo off
+@echo on
 chcp 65001 >nul
 SETLOCAL ENABLEDELAYEDEXPANSION
 TITLE LakeShore 218 / Keithley 2401 Logging - System Startup
