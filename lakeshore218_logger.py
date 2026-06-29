@@ -67,17 +67,26 @@ def connect_instrument():
 def read_all_channels(inst) -> dict:
     """
     Queries KRDG? 0, which returns all 8 input readings (Kelvin) in one
-    comma-separated response. Returns a dict like {"ch1": 4.21, ..., "ch8": ...}.
+    comma-separated response, then picks out and labels only the channels
+    listed in lab_config.LAKESHORE_CHANNEL_MAP. Returns a dict like
+    {"location_1": 4.21, "location_2": 77.3}.
     """
     response = inst.query("KRDG? 0").strip()
     values = [v.strip() for v in response.split(",")]
 
     readings = {}
-    for i, raw in enumerate(values[: cfg.LAKESHORE_NUM_CHANNELS], start=1):
+    for channel_num, label in cfg.LAKESHORE_CHANNEL_MAP.items():
+        idx = channel_num - 1
+        if idx >= len(values):
+            print(f"[LAKESHORE] WARNING: channel {channel_num} not in instrument "
+                  f"response (only {len(values)} values returned)")
+            continue
+        raw = values[idx]
         try:
-            readings[f"ch{i}"] = float(raw)
+            readings[label] = float(raw)
         except ValueError:
-            print(f"[LAKESHORE] WARNING: could not parse channel {i} value: '{raw}'")
+            print(f"[LAKESHORE] WARNING: could not parse channel {channel_num} "
+                  f"({label}) value: '{raw}'")
     return readings
 
 

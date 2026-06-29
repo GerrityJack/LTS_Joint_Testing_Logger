@@ -23,11 +23,14 @@ LAKESHORE_PARITY     = "odd"      # "odd", "even", or "none"
 LAKESHORE_STOP_BITS  = 1
 LAKESHORE_TIMEOUT_MS = 5000
 
-# Which input channels to log (LakeShore 218 has 8). KRDG? 0 returns all
-# eight in one query, so leaving this at 8 has no extra cost even if some
-# channels have no sensor wired up (those just read ~0 or an out-of-range
-# value, which is fine to log).
-LAKESHORE_NUM_CHANNELS = 8
+# Which input channels to log, and what to call them in QuestDB. KRDG? 0
+# still queries all 8 channels in one request (no extra cost), but only the
+# channels listed here get written/kept -- the rest are discarded.
+# Format: {channel_number: column_name}
+LAKESHORE_CHANNEL_MAP = {
+    2: "location_1",
+    4: "location_2",
+}
 
 # ── Keithley 2401 interface ───────────────────────────────────────────────────
 # "GPIB" (via a GPIB controller card + cable, e.g. Keysight 10833F cable into a

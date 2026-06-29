@@ -140,7 +140,11 @@ def main():
     try:
         rm, inst = connect_instrument()
     except Exception as e:
-        print(f"[KEITHLEY] FATAL: Could not open {cfg.KEITHLEY_PORT} — {e}")
+        if cfg.KEITHLEY_INTERFACE.upper() == "GPIB":
+            target = f"GPIB{cfg.KEITHLEY_GPIB_BOARD}::{cfg.KEITHLEY_GPIB_ADDRESS}::INSTR"
+        else:
+            target = cfg.KEITHLEY_PORT
+        print(f"[KEITHLEY] FATAL: Could not open {target} — {e}")
         sys.exit(1)
 
     try:
