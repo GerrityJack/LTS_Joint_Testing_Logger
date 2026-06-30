@@ -1,0 +1,191 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_QUESTDB",
+      "label": "QuestDB",
+      "description": "QuestDB via PostgreSQL wire protocol (port 8812)",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "title": "Lab Instrument Monitor",
+  "uid": "lab-instrument-monitor",
+  "description": "LakeShore 218 temperature readings and Keithley 2401 SMU measurements",
+  "tags": ["lab", "temperature", "keithley", "lakeshore"],
+  "timezone": "browser",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Temperature — Location 1 & 2 (K)",
+      "description": "LakeShore 218 channels 2 and 4. Location 1 = channel 2, Location 2 = channel 4.",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "${DS_QUESTDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT timestamp AS time, location_1, location_2 FROM lakeshore218_temps WHERE $__timeFilter(timestamp) ORDER BY timestamp ASC",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kelvin",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "spanNulls": false,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "location_1" },
+            "properties": [
+              { "id": "displayName", "value": "Location 1 (Ch 2)" },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "location_2" },
+            "properties": [
+              { "id": "displayName", "value": "Location 2 (Ch 4)" },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Voltage (V)",
+      "description": "Keithley 2401 voltage measurement over time.",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
+      "datasource": { "type": "postgres", "uid": "${DS_QUESTDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT timestamp AS time, voltage FROM keithley2401_smu WHERE $__timeFilter(timestamp) ORDER BY timestamp ASC",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "color": { "mode": "fixed", "fixedColor": "green" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "spanNulls": false,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "voltage" },
+            "properties": [
+              { "id": "displayName", "value": "Voltage (V)" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single", "sort": "none" }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "All Keithley Measurements",
+      "description": "Voltage, current and resistance from the Keithley 2401. Voltage and resistance share the left axis; current uses a dedicated right axis (different scale).",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
+      "datasource": { "type": "postgres", "uid": "${DS_QUESTDB}" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT timestamp AS time, voltage, current, resistance FROM keithley2401_smu WHERE $__timeFilter(timestamp) ORDER BY timestamp ASC",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "spanNulls": false,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "voltage" },
+            "properties": [
+              { "id": "displayName", "value": "Voltage (V)" },
+              { "id": "unit", "value": "volt" },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } },
+              { "id": "custom.axisPlacement", "value": "left" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "current" },
+            "properties": [
+              { "id": "displayName", "value": "Current (A)" },
+              { "id": "unit", "value": "amp" },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } },
+              { "id": "custom.axisPlacement", "value": "right" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "resistance" },
+            "properties": [
+              { "id": "displayName", "value": "Resistance (Ω)" },
+              { "id": "unit", "value": "ohm" },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } },
+              { "id": "custom.axisPlacement", "value": "left" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      }
+    }
+  ]
+}
